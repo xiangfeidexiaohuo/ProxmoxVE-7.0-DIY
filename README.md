@@ -482,14 +482,14 @@ ls /dev/dri
 
 ### GVT-G直通(intel)
 
-**此方式适合桌面级别的U(差不多5代起步)，一些小主机可能不支持！！！**
+**此方式适合桌面级别的U(差不多5代起步)，小主机(J4125/N5105等)不支持！！！**
 
 **这种直通和上面的直通方法，二选一，不能同时选2种！！！**
 
 <details>
 <summary>点击展开，查看详细教程！</summary>
 
-#### 1.首先在主板BIOS里面启用GTD，GTX等选项，若要多开几个共享GPU，显存开大点。；
+#### 1.首先在主板BIOS里面启用GTD，GTX等选项，若有aperture size选项，建议512M，没有就不管吧；
 
 #### 2.编辑GRUB配置文件：/etc/default/grub
 
@@ -532,15 +532,21 @@ reboot
 ls /sys/bus/pci/devices/0000:00:02.0/mdev_supported_types/
 ```
 
-出现如下即为成功：
+出现如下即为成功(教程机核显为UHD630)：
 
-i915-GVTg_V5_1 i915-GVTg_V5_2 i915-GVTg_V5_4 i915-GVTg_V5_8
+i915-GVTg_V5_4 i915-GVTg_V5_8
 
 #### 6.配置直通：
 
 cpu类型设置成HOST，将机器设置成q35，将虚拟机显卡设置成无，添加PCIE设备：勾选高级里的ROM-BAR和pcie，主GPU不勾选，MDev类型选择合适显存。
 
 ![jpg](./pic/20.jpg)
+
+* “可用”显示的多少，就可以添加多个“显卡”。
+
+i915-GVTg_V5_4 “可用”为1，就只能添加1个v5_4的“显卡”
+
+i915-GVTg_V5_8 “可用”为2，就只能添加2个v5_8的“显卡”
 
 </details>
 
