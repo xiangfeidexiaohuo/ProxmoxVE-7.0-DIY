@@ -564,19 +564,21 @@ cpu类型设置成HOST，将机器设置成q35，将虚拟机显卡设置成无�
 <details>
 <summary>点击展开，查看详细教程！</summary>
 
-#### 为了实现更多GPU，需要给核显分配更多的显存。但是一般主板的BIOS并没有给调节显存的选项"aperture size"，只给了类似DVMT(Dynamic Video Memory Technology动态分配共享显存技术)最大显存的选项，最大是1024MB，当把DVMT改成1024MB之后，并没有什么用。所以本教程强行改aperture size。
-
-#### 1.首先上一步教程完成后，进PVE终端查看当前分配的显存。
+#### 为了分配更多显卡，需给核显分配更多显存。但一般主板的BIOS并没有给调节显存的选项"aperture size"，只给了类似DVMT(共享显存)选项，最大1024MB，当把DVMT改成1024MB后，并没有用。所以本教程强行改aperture size。
 
 通过命令 `lspci -vs 00:02.0` 查看，一般默认是256M。
 
 ![jpg](./pic/gvt/1.jpg)
 
-#### 2.自行去主板官网下载当前主板的BIOS版本，然后下载教程提供的工具包。
+128M的显卡只有一个，所以需要改大到512M。
+
+![jpg](./pic/20.jpg)
+
+#### 1.自行去主板官网下载当前主板的BIOS(注意版本)，然后下载教程提供的工具包。
 
 [工具包下载地址](https://raw.githubusercontent.com/xiangfeidexiaohuo/ProxmoxVE-7.0-DIY/master/%E6%94%B9GVT%E5%B7%A5%E5%85%B7%E5%8C%85.zip)
 
-#### 3.使用工具包里的UEFITool0270工具，打开BIOS文件，提取模块；
+#### 2.使用工具包里的UEFITool0270工具，打开BIOS文件，提取模块；
 
 ![jpg](./pic/gvt/2.jpg)
 
@@ -594,7 +596,7 @@ cpu类型设置成HOST，将机器设置成q35，将虚拟机显卡设置成无�
 
 ![jpg](./pic/gvt/6.jpg)
 
-#### 4.使用工具包里的IRFExtractor.exe打开另存为的文件，找偏移量。
+#### 3.使用工具包里的IRFExtractor.exe打开另存为的文件，找偏移量。
 
 * 打开，并解析出文本，另存为。
 
@@ -610,17 +612,17 @@ cpu类型设置成HOST，将机器设置成q35，将虚拟机显卡设置成无�
 
 ![jpg](./pic/gvt/10.jpg)
 
-#### 5.准备一个U盘，格式化为FAT32，然后把工具包内的EFI文件夹放U盘跟目录，然后电脑开机U盘启动。
+#### 4.准备一个U盘，格式化为FAT32，然后把工具包内的EFI文件夹放U盘根目录，然后电脑重启进U盘引导。
 
 ![jpg](./pic/gvt/11.jpg)
 
-* 重启电脑进入U盘引导，进入grub命令行模式，直接输入命令：`setup_var 0x2E8 0x3` ，意思就是把aperture size的偏移量默认改成0x3，也就是aperture size为512M。
+* U盘引导进入grub命令行模式，直接输入命令：`setup_var 0x2E8 0x3` ，意思就是把aperture size的偏移量默认改成0x3，也就是aperture size为512M。
 
 * 建议只改512M，经验告诉我们改1G，可能会出问题。
 
 ![jpg](./pic/gvt/12.jpg)
 
-#### 6.改完成功后，开机PVE，就会看到"显卡"多了很多。
+#### 5.改完成功后，开机PVE，就会看到"显卡"多了很多。
 
 ![jpg](./pic/gvt/13.jpg)
 
