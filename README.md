@@ -486,6 +486,8 @@ ls /dev/dri
 
 **这种直通和上面的直通方法，二选一，不能同时选2种！！！**
 
+**好处是显卡拆成好多个分别给不同虚拟机使用。**
+
 <details>
 <summary>点击展开，查看详细教程！</summary>
 
@@ -538,20 +540,97 @@ i915-GVTg_V5_4 i915-GVTg_V5_8
 
 #### 6.配置直通：
 
-cpu类型设置成HOST，将机器设置成q35，将虚拟机显卡设置成无，添加PCIE设备：勾选高级里的ROM-BAR和pcie，主GPU不勾选，MDev类型选择合适显存。
+cpu类型设置成HOST，将机器设置成q35，将虚拟机显卡设置成无，添加PCIE设备：勾选高级里的ROM-Bar和PCI-E，主GPU不勾选，MDev类型选择合适"显卡"。
 
 ![jpg](./pic/20.jpg)
 
 * “可用”显示的多少，就可以添加多个“显卡”。
 
-i915-GVTg_V5_4 “可用”为1，就只能添加1个v5_4的“显卡”
-
-i915-GVTg_V5_8 “可用”为2，就只能添加2个v5_8的“显卡”
+比如上图就是说：只能添加1个v5_4的“显卡”或者添加2个v5_8的“显卡”，只能用一种类型的显卡。
 
 </details>
 
 
 ***
+
+
+
+### GVT-G改显存，增加"显卡"
+
+**承接上一个GVT-G直通教程。**
+
+**此教程有风险，请知悉，若操作，请自行承担风险。**
+
+<details>
+<summary>点击展开，查看详细教程！</summary>
+
+#### 为了实现更多GPU，需要给核显分配更多的显存。但是一般主板的BIOS并没有给调节显存的选项"aperture size"，只给了类似DVMT(Dynamic Video Memory Technology动态分配共享显存技术)最大显存的选项，最大是1024MB，当把DVMT改成1024MB之后，并没有什么用。所以本教程强行改aperture size。
+
+#### 1.首先上一步教程完成后，进PVE终端查看当前分配的显存。
+
+通过命令 `lspci -vs 00:02.0` 查看，一般默认是256M。
+
+![jpg](./pic/gvt/1.jpg)
+
+#### 2.自行去主板官网下载当前主板的BIOS版本，然后下载教程提供的工具包。
+
+[工具包下载地址](https://raw.githubusercontent.com/xiangfeidexiaohuo/ProxmoxVE-7.0-DIY/master/%E6%94%B9GVT%E5%B7%A5%E5%85%B7%E5%8C%85.zip)
+
+#### 3.使用工具包里的UEFITool0270工具，打开BIOS文件，提取模块；
+
+![jpg](./pic/gvt/2.jpg)
+
+* 按Ctrl+F打开搜索页面，切换到text选项卡，搜索aperture size：
+
+![jpg](./pic/gvt/3.jpg)
+
+* 点击搜索出来的结果，会跳转到对应模块位置；
+
+![jpg](./pic/gvt/4.jpg)
+
+* 然后导出模块，并另存为。
+
+![jpg](./pic/gvt/5.jpg)
+
+![jpg](./pic/gvt/6.jpg)
+
+#### 4.使用工具包里的IRFExtractor.exe打开另存为的文件，找偏移量。
+
+* 打开，并解析出文本，另存为。
+
+![jpg](./pic/gvt/7.jpg)
+
+![jpg](./pic/gvt/8.jpg)
+
+* 打开解析文本，搜索aperture size，红框内的 `0x2E8` 就是我们要找的偏移量。每个主板的BIOS偏移量不一样。
+
+![jpg](./pic/gvt/9.jpg)
+
+* 通过图可以看出，默认是0x1，也就是256M。若要改512M，就得默认0x3，改1G，就得默认0x7。
+
+![jpg](./pic/gvt/10.jpg)
+
+#### 5.准备一个U盘，格式化为FAT32，然后把工具包内的EFI文件夹放U盘跟目录，然后电脑开机U盘启动。
+
+![jpg](./pic/gvt/11.jpg)
+
+* 重启电脑进入U盘引导，进入grub命令行模式，直接输入命令：`setup_var 0x2E8 0x3` ，意思就是把aperture size的偏移量默认改成0x3，也就是aperture size为512M。
+
+* 建议只改512M，经验告诉我们改1G，可能会出问题。
+
+![jpg](./pic/gvt/12.jpg)
+
+#### 6.改完成功后，开机PVE，就会看到"显卡"多了很多。
+
+![jpg](./pic/gvt/13.jpg)
+
+
+</details>
+
+
+***
+
+
 
 
 ### 直通硬盘(全盘映射)
