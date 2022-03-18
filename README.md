@@ -631,6 +631,53 @@ cpu类型设置成HOST，将机器设置成q35，将虚拟机显卡设置成无�
 ***
 
 
+### GVT-G黑群辉核显直通+人脸
+
+<details>
+<summary>点击展开，查看详细教程！</summary>
+
+#### 1.先把群辉虚拟机关机，然后硬件——显示，设为无； 然后修改虚拟机配置文件；
+
+/etc/pve/qemu-server/102.conf (教程演示群辉虚拟机ID是102，所以是102.conf)
+
+在配置文件第一行写入以下代码：
+
+```
+args: -device vfio-pci,sysfsdev=/sys/bus/mdev/devices/604e42e4-2e90-11ec-8861-037c58d42915,addr=02.0,x-igd-opregion=on,driver=vfio-pci-nohotplug
+```
+![jpg](./pic/gvt/14.jpg)
+
+#### 2.然后PVE终端，运行命令：
+
+```
+mkdir /var/lib/vz/snippets
+
+cp /usr/share/pve-docs/examples/guest-example-hookscript.pl /var/lib/vz/snippets/102-autocreate.pl
+```
+
+尾部的102和虚拟机ID对应；然后修改/var/lib/vz/snippets/102-autocreate.pl，在如图位置添加下列2行代码：
+
+```
+system("echo 604e42e4-2e90-11ec-8861-037c58d42915 > /sys/bus/pci/devices/0000:00:02.0/mdev_supported_types/i915-GVTg_V5_4/create");
+
+上一行代码中的i915-GVTg_V5_4，取决于你要什么类型的显卡，V5_2/8都行。
+
+
+system("echo 1 > /sys/bus/mdev/devices/604e42e4-2e90-11ec-8861-037c58d42915/remove");
+```
+![jpg](./pic/gvt/15.jpg)
+
+
+#### 3.最后终端执行：`qm set 102 --hookscript local:snippets/102-autocreate.pl` (102和虚拟机ID对应)
+
+#### 4.群辉开机，核显已经直通，且photo人脸ok。
+
+
+</details>
+
+
+***
+
 
 
 ### 直通硬盘(全盘映射)
