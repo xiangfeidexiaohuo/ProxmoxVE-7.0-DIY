@@ -107,11 +107,7 @@ apt update && apt dist-upgrade -y
 apt-get install lm-sensors
 ```
 
-
-#### 2.探测下温度，执行：(一路yes，回车)
-```
-sensors-detect
-```
+#### 2.探测下温度，执行：`sensors-detect` (一路yes，回车)
 
 #### 3.获取温度信息，执行：`sensors`
 
@@ -126,15 +122,9 @@ sensors-detect
 
 (我习惯于下载到本地用Notepad++修改)
 
-搜索：
-```
-$res->{pveversion} = PVE::pvecfg::package()
-```
+搜索：`$res->{pveversion} = PVE::pvecfg::package()`
 
-在这个定义的下方添加：
-```
-$res->{thermalstate} = `sensors`;
-```
+在这个定义的下方添加：`$res->{thermalstate} = `sensors`;`
 
 结果如图：
 
@@ -148,7 +138,7 @@ $res->{thermalstate} = `sensors`;
 
 (我习惯于下载到本地用Notepad++修改)
 
-搜索PVE Manager Version
+搜索`PVE Manager Version`
 
 ![jpg](./pic/3.jpg)
 
@@ -259,7 +249,7 @@ $res->{thermalstate} = `sensors`;
 <details>
 <summary>点击展开，查看详细教程！</summary>
 
-* 扩展下，主界面添加CPU频率：
+#### * 扩展下，主界面添加CPU频率：
 
 #### 1.也是修改 /usr/share/perl5/PVE/API2/Nodes.pm 和 /usr/share/pve-manager/js/pvemanagerlib.js 这2个文件
 
@@ -306,7 +296,7 @@ $res->{cpusensors} = `lscpu | grep MHz`;
 <details>
 <summary>点击展开，查看详细教程！</summary>
 
-* 扩展下，主界面添加硬盘温度：
+#### * 扩展下，主界面添加硬盘温度：
 
 #### 1.登录PVE的SSH，执行命令安装hddtemp：
 ```
@@ -368,7 +358,7 @@ apt-get install hddtemp
 <details>
 <summary>点击展开，查看详细教程！</summary>
 
-改布局：
+#### 改布局：
 
 * 还是这个文件：pvemanagerlib.js，搜索：`widget.pveNodeStatus`
 
