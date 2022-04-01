@@ -97,7 +97,7 @@ apt update && apt dist-upgrade -y
 ***
 
 
-### Proxmox VE 主界面添加温度/CPU频率
+### Proxmox VE 主界面显示CPU温度
 
 <details>
 <summary>点击展开，查看详细教程！</summary>
@@ -113,13 +113,13 @@ apt-get install lm-sensors
 sensors-detect
 ```
 
-#### 3.获取温度信息，执行：sensors
+#### 3.获取温度信息，执行：`sensors`
 
 ![jpg](./pic/1.jpg)
 
- * ACPI interface那里是主板温度：temp1和temp2 (有些主板不一样，建议不管主板温度)
+ * acpitz-acpi-0那里是主板温度：temp1和temp2 (有些主板不一样，建议不管主板温度)
 
- * ISA adapter那里是CPU温度：Core0和Core1 (几个核心就是显示几个，演示机只有双核，所以只有2个) 
+ * coretemp-isa-0000那里是CPU温度：Core0和Core1 (几个核心就是显示几个，演示机只有双核，所以只有2个) 
 
 
 #### 4.WinSCP登录到PVE，修改这个文件：/usr/share/perl5/PVE/API2/Nodes.pm 
@@ -241,17 +241,29 @@ $res->{thermalstate} = `sensors`;
 
  * 所以自己设备几个核心，按需修改。修改完保存，然后塞回路径。
 
-
-#### 6.改完重启进PVE主页，就看到温度显示了。
+#### 6.改完执行 `systemctl restart pveproxy` 重进PVE主页，就看到温度显示了。
 
 ![jpg](./pic/6.jpg)
 
 
-* 扩展下，主界面添加CPU频率，显示在温度下面：
+</details>
 
-* 也是修改 /usr/share/perl5/PVE/API2/Nodes.pm 和 /usr/share/pve-manager/js/pvemanagerlib.js 这2个文件
 
-* /usr/share/perl5/PVE/API2/Nodes.pm 刚刚修改温度的下一行添加：
+***
+
+
+### Proxmox VE 主界面显示CPU频率
+
+**承接上一个显示CPU温度教程。**
+
+<details>
+<summary>点击展开，查看详细教程！</summary>
+
+* 扩展下，主界面添加CPU频率：
+
+#### 1.也是修改 /usr/share/perl5/PVE/API2/Nodes.pm 和 /usr/share/pve-manager/js/pvemanagerlib.js 这2个文件
+
+* /usr/share/perl5/PVE/API2/Nodes.pm 刚刚修改CPU温度那里添加：
 
 ```
 $res->{cpusensors} = `lscpu | grep MHz`;
@@ -277,20 +289,100 @@ $res->{cpusensors} = `lscpu | grep MHz`;
 ```
 ![jpg](./pic/26.jpg)
 
-* 效果就是在主界面显示温度的下一行显示频率：
+#### 2.改完执行 `systemctl restart pveproxy` 重进PVE主页，效果如图：
 
 ![jpg](./pic/27.jpg)
 
+</details>
 
-#### 7.如果更新到PVE 7.1-5或者更新，发现改了温度+频率都不显示，前面的步骤又没错，那么就需要改布局：
 
-还是这个文件：pvemanagerlib.js，搜索：
+***
+
+
+### Proxmox VE 主界面显示硬盘温度
+
+**同样承接上一个显示CPU温度教程。**
+
+<details>
+<summary>点击展开，查看详细教程！</summary>
+
+* 扩展下，主界面添加硬盘温度：
+
+#### 1.登录PVE的SSH，执行命令安装hddtemp：
 ```
-gettext('Status') + ': ' + zpool
+apt-get install hddtemp
 ```
+
+* 然后执行 `chmod +s /usr/sbin/hddtemp`
+
+* 执行 `hddtemp /dev/sd?` 就能看到硬盘温度：
+
+![jpg](./pic/33.jpg)
+
+
+#### 2.然后修改 /usr/share/perl5/PVE/API2/Nodes.pm 和 /usr/share/pve-manager/js/pvemanagerlib.js 这2个文件
+
+* /usr/share/perl5/PVE/API2/Nodes.pm 刚刚修改CPU温度那里添加：
+
+```
+ $res->{thermal_hdd} = `hddtemp /dev/sd?`;
+```
+![jpg](./pic/30.jpg)
+
+* /usr/share/pve-manager/js/pvemanagerlib.js 刚刚修改温度的下一行添加：
+
+```
+	{
+            itemId: 'thermal-hdd',
+            colspan: 2,
+            printBar: false,
+            title: gettext('硬盘温度'),
+            textField: 'thermal_hdd',
+            renderer: function(value) {
+                value = value.replaceAll('Â', '');
+                return value.replaceAll('\n', '<br>');
+            }
+	}
+```
+![jpg](./pic/31.jpg)
+
+#### 3.改完执行 `systemctl restart pveproxy` 重进PVE主页，效果如图：
+
+![jpg](./pic/32.jpg)
+
+
+
+</details>
+
+
+
+***
+
+
+
+
+### Proxmox VE 改显示范围
+
+**如果发现改上面的温度/CPU频率/硬盘温度，步骤又没错，但是主界面不显示，就需要下列教程。**
+
+<details>
+<summary>点击展开，查看详细教程！</summary>
+
+改布局：
+
+* 还是这个文件：pvemanagerlib.js，搜索：`widget.pveNodeStatus`
+
+![jpg](./pic/29.jpg)
+
+将 height: 300 改大为400，或者更大，然后保存。
+
+
+
+* 搜索：`gettext('Status') + ': ' + zpool` (这一处不一定有，搜不到，就不用管了。)
+
 ![jpg](./pic/28.jpg)
 
-将 height: 600 改大为700，然后保存。
+将 height: 600 改大为700，或者更大，然后保存。
 
 
 </details>
