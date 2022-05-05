@@ -124,7 +124,7 @@ apt-get install lm-sensors
 
 搜索：`$res->{pveversion} = PVE::pvecfg::package()`
 
-在这个定义的下方添加：`$res->{thermalstate} = `sensors`;`
+在这个定义的下方添加：```$res->{thermalstate} = `sensors`;```
 
 结果如图：
 
