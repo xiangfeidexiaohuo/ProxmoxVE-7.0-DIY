@@ -242,6 +242,45 @@ apt-get install lm-sensors
 ***
 
 
+### Proxmox VE 主界面显示PCI-E盘位硬盘温度
+
+**同样承接上一个显示CPU温度教程。**
+
+* 此教程主要针对PCI-E盘位硬盘(也就是M.2固态)，机械硬盘看下方专门的机械硬盘教程。
+
+* 此教程是在上个“Proxmox VE 主界面显示CPU温度”基础上来做。
+
+<details>
+<summary>点击展开，查看详细教程！</summary>
+
+#### * 扩展下，主界面添加M.2固态硬盘温度：
+
+#### 1.已经完成“Proxmox VE 主界面显示CPU温度”，然后终端执行：`sensors`
+
+![jpg](./pic/34.jpg)
+
+* nvme-pci-0100此处就是M.2固态温度
+
+#### 2.修改这个文件：/usr/share/pve-manager/js/pvemanagerlib.js
+
+在上个教程改CPU温度的定义里，加入下图红框内的内容：
+
+`const nvme0 = value.match(/Composite.*?\+([\d\.]+)Â/)[1];`
+
+`|| 固态: ${nvme0} ℃ `
+
+![jpg](./pic/35.jpg)
+
+#### 3.改完保存执行`systemctl restart pveproxy`重进PVE主页。
+
+
+</details>
+
+
+***
+
+
+
 ### Proxmox VE 主界面显示CPU频率
 
 **承接上一个显示CPU温度教程。**
@@ -289,9 +328,11 @@ $res->{cpusensors} = `lscpu | grep MHz`;
 ***
 
 
-### Proxmox VE 主界面显示硬盘温度
+### Proxmox VE 主界面显示机械硬盘温度
 
 **同样承接上一个显示CPU温度教程。**
+
+* 此教程主要针对机械硬盘，PCI-E插槽的固件硬盘看上方的温度教程。
 
 <details>
 <summary>点击展开，查看详细教程！</summary>
