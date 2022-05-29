@@ -149,7 +149,7 @@ apt-get install lm-sensors
           itemId: 'thermal',
           colspan: 2,
           printBar: false,
-          title: gettext('CPU温度'),
+          title: gettext('温度'),
           textField: 'thermalstate',
           renderer:function(value){
               const p0 = value.match(/Package id 0.*?\+([\d\.]+)Â/)[1];
@@ -174,7 +174,7 @@ apt-get install lm-sensors
           itemId: 'thermal',
           colspan: 2,
           printBar: false,
-          title: gettext('CPU温度'),
+          title: gettext('温度'),
           textField: 'thermalstate',
           renderer:function(value){
               const p0 = value.match(/Package id 0.*?\+([\d\.]+)Â/)[1];
@@ -193,7 +193,7 @@ apt-get install lm-sensors
           itemId: 'thermal',
           colspan: 2,
           printBar: false,
-          title: gettext('CPU温度'),
+          title: gettext('温度'),
           textField: 'thermalstate',
           renderer:function(value){
               const p0 = value.match(/Package id 0.*?\+([\d\.]+)Â/)[1];
@@ -216,7 +216,7 @@ apt-get install lm-sensors
           itemId: 'thermal',
           colspan: 2,
           printBar: false,
-          title: gettext('CPU温度'),
+          title: gettext('温度'),
           textField: 'thermalstate',
           renderer:function(value){
               const p0 = value.match(/Package id 0.*?\+([\d\.]+)Â/)[1];
@@ -312,7 +312,7 @@ $res->{cpusensors} = `lscpu | grep MHz`;
 			  const f0 = value.match(/CPU MHz.*?([\d]+)/)[1];
 			  const f1 = value.match(/CPU min MHz.*?([\d]+)/)[1];
 			  const f2 = value.match(/CPU max MHz.*?([\d]+)/)[1];
-			  return `CPU实时: ${f0} MHz | 最小: ${f1} MHz | 最大: ${f2} MHz `
+			  return `实时: ${f0} MHz | 最小: ${f1} MHz | 最大: ${f2} MHz `
             }
 	},
 ```
