@@ -113,9 +113,9 @@ apt-get install lm-sensors
 
 ![jpg](./pic/1.jpg)
 
- * acpitz-acpi-0那里是主板温度：temp1和temp2 (有些主板不一样，建议不管主板温度)
+ * 红色箭头：temp1这里是主板温度，可能某些主板还有temp2、temp3等
 
- * coretemp-isa-0000那里是CPU温度：Core0和Core1 (几个核心就是显示几个，演示机只有双核，所以只有2个) 
+ * 黄色箭头：Package id 0、core0~5这里是CPU温度，有多少个核心，就显示多少
 
 
 #### 4.WinSCP登录到PVE，修改这个文件：/usr/share/perl5/PVE/API2/Nodes.pm 
@@ -145,7 +145,7 @@ apt-get install lm-sensors
  * 在这个定义的下方添加一个定义：
 
 ```
-	{
+    {
           itemId: 'thermal',
           colspan: 2,
           printBar: false,
@@ -153,24 +153,19 @@ apt-get install lm-sensors
           textField: 'thermalstate',
           renderer:function(value){
               const p0 = value.match(/Package id 0.*?\+([\d\.]+)Â/)[1];
-              const c0 = value.match(/Core 0.*?\+([\d\.]+)Â/)[1];
-              const c1 = value.match(/Core 1.*?\+([\d\.]+)Â/)[1];
               const b0 = value.match(/temp1.*?\+([\d\.]+)?/)[1];
-              const b1 = value.match(/temp2.*?\+([\d\.]+)?/)[1];
-              return `Package: ${p0} ℃ || 核心1: ${c0} ℃ | 核心2: ${c1} ℃ || 主板: ${b0} ℃ | ${b1} ℃ `
+              return `CPU: ${p0} ℃ || 主板: ${b0} ℃ `
             }
     },
 ```
-
 结果如图：
+
 ![jpg](./pic/4.jpg)
 
-因为我是双核心，所以只写了2个核心的温度参数。
+* 上述是一种比较简单的万金油做法，有些人可能要把每个核心的温度有写出来，或者说有几个主板温度，也要一起写出来，那么就按照下列的格式：
 
-
- * 如果不要加入主板温度，就是这样：
 ```
-	{
+    {
           itemId: 'thermal',
           colspan: 2,
           printBar: false,
@@ -180,56 +175,27 @@ apt-get install lm-sensors
               const p0 = value.match(/Package id 0.*?\+([\d\.]+)Â/)[1];
               const c0 = value.match(/Core 0.*?\+([\d\.]+)Â/)[1];
               const c1 = value.match(/Core 1.*?\+([\d\.]+)Â/)[1];
-              return `Package: ${p0} ℃ || 核心1: ${c0} ℃ | 核心2: ${c1} ℃ `
+              const c2 = value.match(/Core 2.*?\+([\d\.]+)Â/)[1];
+              const c3 = value.match(/Core 3.*?\+([\d\.]+)Â/)[1];
+              const c4 = value.match(/Core 4.*?\+([\d\.]+)Â/)[1];
+              const c5 = value.match(/Core 5.*?\+([\d\.]+)Â/)[1];
+              const b0 = value.match(/temp1.*?\+([\d\.]+)?/)[1];
+              const b1 = value.match(/temp2.*?\+([\d\.]+)?/)[1];
+              return `CPU: ${p0} ℃ || CPU1: ${c0} ℃ CPU2: ${c1} ℃ CPU3: ${c2} ℃ CPU4: ${c3} ℃ CPU5: ${c4} ℃ CPU6: ${c5} ℃ || 主板1: ${b0} ℃ 主板2: ${b1} ℃`
             }
     },
 ```
+结果如图：
 
+![jpg](./pic/5.jpg)
 
- * 如果是四核心的就是这样：
+* 红框内就是单独每个核心或者每个主板温度
 
-```         
-	{
-          itemId: 'thermal',
-          colspan: 2,
-          printBar: false,
-          title: gettext('温度'),
-          textField: 'thermalstate',
-          renderer:function(value){
-              const p0 = value.match(/Package id 0.*?\+([\d\.]+)Â/)[1];
-              const c0 = value.match(/Core 0.*?\+([\d\.]+)Â/)[1];
-              const c1 = value.match(/Core 1.*?\+([\d\.]+)Â/)[1];
-              const c2 = value.match(/Core 2.*?\+([\d\.]+)Â/)[1];
-              const c3 = value.match(/Core 3.*?\+([\d\.]+)Â/)[1];
-              const b0 = value.match(/temp1.*?\+([\d\.]+)?/)[1];
-              const b1 = value.match(/temp2.*?\+([\d\.]+)?/)[1];
-              return `Package: ${p0} ℃ || 核心1: ${c0} ℃ | 核心2: ${c1} ℃ | 核心3: ${c2} ℃ | 核心4: ${c3} ℃ || 主板: ${b0} ℃ | ${b1} ℃ `
-            }
-    },	  
-```
+* 前面的CPU温度是综合温度，后面的CPU1~6是每个核心单独温度
 
+* 可根据实际情况增减CPU温度或者主板温度
 
- * 如果是四核心不要加入主板温度就是这样：
-
-```         
-	{
-          itemId: 'thermal',
-          colspan: 2,
-          printBar: false,
-          title: gettext('温度'),
-          textField: 'thermalstate',
-          renderer:function(value){
-              const p0 = value.match(/Package id 0.*?\+([\d\.]+)Â/)[1];
-              const c0 = value.match(/Core 0.*?\+([\d\.]+)Â/)[1];
-              const c1 = value.match(/Core 1.*?\+([\d\.]+)Â/)[1];
-              const c2 = value.match(/Core 2.*?\+([\d\.]+)Â/)[1];
-              const c3 = value.match(/Core 3.*?\+([\d\.]+)Â/)[1];
-              return `Package: ${p0} ℃ || 核心1: ${c0} ℃ | 核心2: ${c1} ℃ | 核心3: ${c2} ℃ | 核心4: ${c3} ℃ `
-            }
-    },	  
-```
-
- * 所以自己设备几个核心，按需修改。修改完保存，然后塞回路径。
+* 其实如果核心超过4个，不建议把每个核心温度写出来，不美观
 
 #### 6.改完执行 `systemctl restart pveproxy` 重进PVE主页，就看到温度显示了。
 
@@ -273,6 +239,7 @@ apt-get install lm-sensors
 
 #### 3.改完保存执行`systemctl restart pveproxy`重进PVE主页。
 
+![jpg](./pic/36.jpg)
 
 </details>
 
