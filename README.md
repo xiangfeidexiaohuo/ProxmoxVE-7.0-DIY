@@ -208,11 +208,11 @@ apt-get install lm-sensors
 ***
 
 
-### Proxmox VE 主界面显示PCI-E盘位硬盘温度
+### Proxmox VE 主界面显示(PCI-E盘位)硬盘温度
 
 **承接上一个显示CPU温度教程。**
 
-* 此教程主要针对PCI-E盘位硬盘(也就是M.2固态)，机械硬盘显示温度教程在下方。
+* 此教程主要针对PCI-E盘位硬盘(也就是M.2固态)，SATA盘位硬盘显示温度教程在下方。
 
 * 此教程是在上个“Proxmox VE 主界面显示CPU温度”基础上来做。
 
@@ -295,11 +295,11 @@ $res->{cpusensors} = `lscpu | grep MHz`;
 ***
 
 
-### Proxmox VE 主界面显示机械硬盘温度
+### Proxmox VE 主界面显示(SATA盘位)硬盘温度
 
 **同样承接上一个显示CPU温度教程。**
 
-* 此教程主要针对机械硬盘。
+* 此教程主要针对SATA盘位硬盘。
 
 <details>
 <summary>点击展开，查看详细教程！</summary>
