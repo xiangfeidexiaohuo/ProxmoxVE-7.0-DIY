@@ -327,7 +327,7 @@ apt-get install hddtemp
 ```
 ![jpg](./pic/30.jpg)
 
-* /usr/share/pve-manager/js/pvemanagerlib.js 刚刚修改温度的下一行添加：
+* /usr/share/pve-manager/js/pvemanagerlib.js 刚刚修改CPU温度的下一行添加：
 
 ```
 	{
@@ -340,7 +340,7 @@ apt-get install hddtemp
                 value = value.replaceAll('Â', '');
                 return value.replaceAll('\n', '<br>');
             }
-	}
+	},
 ```
 ![jpg](./pic/31.jpg)
 
