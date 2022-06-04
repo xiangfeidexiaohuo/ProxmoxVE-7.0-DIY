@@ -873,6 +873,8 @@ ps：例如我的pve的ip是192.168.100.1，那么就是进入http://192.168.100
 
 #### 1.首先在帖子里下载编译好的驱动，然后解压：
 
+[下载驱动](https://raw.githubusercontent.com/xiangfeidexiaohuo/ProxmoxVE-7.0-DIY/master/realtek-r8125-dkms_9.009.00-1_amd64.deb.zip)
+
 ![jpg](./pic/37.jpg)
 
 ![jpg](./pic/38.jpg)
@@ -884,11 +886,11 @@ ps：例如我的pve的ip是192.168.100.1，那么就是进入http://192.168.100
 * 依次执行下列命令：(一次一行)
 
 ```
-apt  install ethtool
+apt install ethtool
 
 apt update && apt install pve-headers-$(uname -r)
 
-apt  install dkms
+apt install dkms
 
 dpkg -i realtek-r8125-dkms_9.009.00-1_amd64.deb
 
@@ -900,7 +902,8 @@ echo 'blacklist r8169' >> /etc/modprobe.d/blacklist-r8169.conf
 ![jpg](./pic/40.jpg)
 
 * 然后执行：`update-initramfs -u -k 内核版本`
-比如教程演示机的pve内核版本为：`5.15.35-1-pve`，那么执行的命令就是：`update-initramfs -u -k 5.15.35-1-pve`
+
+* 比如教程演示机的pve内核版本为：`5.15.35-1-pve`，那么执行的命令就是：`update-initramfs -u -k 5.15.35-1-pve`
 
 ![jpg](./pic/41.jpg)
 
