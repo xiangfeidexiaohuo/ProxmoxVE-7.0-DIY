@@ -8,6 +8,8 @@
 
 ### Proxmox VE 7.x 换源
 
+* **必须保证pve系统能联网，没联网，没法换源。**
+
 <details>
 <summary>点击展开，查看详细教程！</summary>
 
@@ -244,8 +246,8 @@ apt-get install lm-sensors
 </details>
 
 
-***
 
+***
 
 
 ### Proxmox VE 主界面显示CPU频率
@@ -357,6 +359,87 @@ apt-get install hddtemp
 ***
 
 
+### Proxmox VE 主界面显示温度的另一种方案: JSON格式
+
+* 因为常规的方案有些局限，但是吧，我又不想推翻整个“温度”相关的教程，所以单独说下。
+
+* 自己本身没插nvme固态，所以呢，我就以普通的CPU温度为例，道理是一样的。
+
+* 适合多个nvme固态等同参数的获取温度，如果不懂是啥，此教程就忽略。
+
+<details>
+<summary>点击展开，查看详细教程！</summary>
+
+#### * 比如多个nvme固态显示温度，看如下图：
+
+![jpg](./pic/44.jpg)
+
+可以看到两块nvme固态的温度读取值都是Composite，但是确实有2个固态，用之前常规的方案，就无法显示2个nvme固态的温度，所以需要另外的方案。
+
+#### 1.常理还是必须安装sensors：
+
+```
+apt-get install lm-sensors
+```
+
+#### 2.然后终端执行`sensors -j`
+
+![jpg](./pic/45.jpg)
+
+coretemp-isa-0000 CPU传感器
+
+temp1_input/temp2_input/temp3_input等就是核心温度
+
+
+#### 3.也是修改：/usr/share/perl5/PVE/API2/Nodes.pm 同样的位置：
+
+```
+$res->{sensinfo} = `sensors -j`;
+```
+![jpg](./pic/46.jpg)
+
+
+#### 4.也是修改这个文件：/usr/share/pve-manager/js/pvemanagerlib.js 同样的位置： 
+
+```
+	{
+          itemId: 'sensinfo',
+          colspan: 2,
+          printBar: false,
+          title: gettext('温度'),
+          textField: 'sensinfo',
+          renderer:function(value){
+			  value = JSON.parse(value.replaceAll('Â', ''));
+			  const c0 = value['coretemp-isa-0000']['Core 0']['temp2_input'].toFixed(1);
+			  const c1 = value['coretemp-isa-0000']['Core 1']['temp3_input'].toFixed(1);
+			  const c2 = value['coretemp-isa-0000']['Core 2']['temp4_input'].toFixed(1);
+			  const c3 = value['coretemp-isa-0000']['Core 3']['temp5_input'].toFixed(1);			  
+			  return `CPU温度: ${c0}℃ | ${c1}℃ | ${c2}℃ | ${c3}℃ `; 
+            }
+    },
+```
+
+![jpg](./pic/47.jpg)
+
+* coretemp-isa-0000 CPU传感器
+
+* Core 0 到 Core 3 就是CPU核心1~4
+
+* temp2_input 到 temp5_input CPU核心1~4的温度
+
+* 如果有别的传感器温度，比如nvme固态，依葫芦画瓢更改内容。
+
+
+#### 5.如果用这种方案改写了CPU温度，之前的常规CPU方案代码可以去掉，自行理解，这个教程我写的比较简单。
+
+#### 6.改完保存执行`systemctl restart pveproxy`重进PVE主页。
+
+
+</details>
+
+
+
+***
 
 
 ### Proxmox VE 改显示范围
