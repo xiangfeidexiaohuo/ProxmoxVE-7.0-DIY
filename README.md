@@ -941,4 +941,57 @@ ps：例如我的pve的ip是192.168.100.1，那么就是进入http://192.168.100
 
 
 
+***
+
+
+### 配置PVE的性能/省电模式
+
+* 常理来说Linux的系统CPU模式是性能模式，而PVE是基于debian的系统，所以PVE默认的也是性能模式。
+
+* 可能有些小伙伴的PVE主机性能很强，功耗也高，可以通过设置成省电模式，来降低功耗。
+
+* 具体能降低多少，请自测。
+
+<details>
+<summary>点击展开，查看详细教程！</summary>
+
+
+#### 1.当前PVE主机是否支持多种模式切换，终端执行：
+```
+cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
+```
+
+![jpg](./pic/48.jpg)
+
+能返回 `performance` (性能模式) 和 `powersave` (省电模式)，就接着往下看，如果只有 `performance` 就关闭这个教程。
+
+
+#### 2.安装cpupower，终端执行：
+```
+apt-get install linux-cpupower -y
+```
+
+![jpg](./pic/49.jpg)
+
+
+#### 3.切换成省电模式，终端执行：
+```
+cpupower -c all frequency-set -g powersave
+```
+
+![jpg](./pic/50.jpg)
+
+有多少核，就会返回多少cpu。
+
+* 然后执行： `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor` ，查看当前CPU处于什么模式。
+
+![jpg](./pic/51.jpg)
+
+可以看到已经切成`powersave`省电模式。
+
+* 如果要切回性能模式，就执行： `cpupower -c all frequency-set -g performance` 。
+
+
+</details>
+
 
