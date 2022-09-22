@@ -963,8 +963,9 @@ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
 
 ![jpg](./pic/48.jpg)
 
-能返回 `performance` (性能模式) 和 `powersave` (省电模式)，就接着往下看，如果只有 `performance` 就关闭这个教程。
+能返回 `performance` (性能模式) 和 `powersave` (省电模式)等，就接着往下看，如果只有 `performance` 就关闭这个教程。
 
+* 有些机器CPU比较新，可能还有conservative、schedutil、ondemand等，都可以切换。
 
 #### 2.安装cpupower，终端执行：
 ```
@@ -982,6 +983,20 @@ cpupower -c all frequency-set -g powersave
 ![jpg](./pic/50.jpg)
 
 有多少核，就会返回多少cpu。
+
+
+* 如果想切换到其他模式：conservative、schedutil、ondemand等
+
+```
+cpupower -c all frequency-set -g conservative
+```
+```
+cpupower -c all frequency-set -g schedutil
+```
+```
+cpupower -c all frequency-set -g ondemand
+```
+
 
 * 然后执行： `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor` ，查看当前CPU处于什么模式。
 
