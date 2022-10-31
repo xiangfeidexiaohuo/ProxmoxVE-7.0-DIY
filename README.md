@@ -1010,3 +1010,58 @@ cpupower -c all frequency-set -g ondemand
 </details>
 
 
+
+***
+
+
+### PVE7.x升级第三方内核6.0
+
+* PVE7.x目前官方默认内核是5.15，找到个第三方的6.0内核，也可以玩玩。
+
+* 仅适用于PVE 7.x，PVE6.x绕道。
+
+* 仅适用于动手能力强的，小白绕道!
+
+* 升级内核可能有翻车的风险，风险自行承担！
+
+* 这是一趟霸王车，只有升级到6.0内核，没有退路(没法回退5.15)。
+
+<details>
+<summary>点击展开，查看详细教程！</summary>
+
+
+#### 1.添加存储库的GPG密钥，终端执行：
+```
+curl -1sLf 'https://dl.cloudsmith.io/public/pve-edge/kernel/gpg.8EC01CCF309B98E7.key' | gpg --dearmor -o /usr/share/keyrings/pve-edge-kernel.gpg
+```
+
+#### 2.设置pve-edge-kernel存储库，终端执行：
+```
+echo "deb [signed-by=/usr/share/keyrings/pve-edge-kernel.gpg] https://dl.cloudsmith.io/public/pve-edge/kernel/deb/debian bullseye main" > /etc/apt/sources.list.d/pve-edge-kernel.list
+```
+
+#### 3.安装内核，终端执行：
+```
+apt update
+```
+
+```
+apt install pve-kernel-6.0-edge
+```
+
+#### 4.重启以后，内核就升级到6.0了。
+
+![jpg](./pic/52.jpg)
+
+
+#### 5.查看内核更新没，可去下面的网址看看，若有新版，重复第三步的操作。
+
+[查看内核更新](https://github.com/fabianishere/pve-edge-kernel/releases)
+
+
+#### 6.已经升级到第三方内核，如果你在wed界面“更新”，看到更新，就不要胡乱更新了。
+
+
+</details>
+
+
