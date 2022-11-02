@@ -1024,10 +1024,14 @@ cpupower -c all frequency-set -g ondemand
 
 * 升级内核可能有翻车的风险，风险自行承担！
 
-* 这是一趟霸王车，只有升级到6.0内核，没有退路(没法回退5.15)。
-
 <details>
 <summary>点击展开，查看详细教程！</summary>
+
+#### 0.升级6.0内核之前，请先牢记当前pve的内核版本号，后面回退要用。
+
+![jpg](./pic/54.jpg)
+
+如图所示，当前内核版本号就为：5.15.64-1-pve
 
 
 #### 1.添加存储库的GPG密钥，终端执行：
@@ -1060,6 +1064,28 @@ apt install pve-kernel-6.0-edge
 
 
 #### 6.已经升级到第三方内核，如果你在wed界面“更新”，看到更新，就不要胡乱更新了。
+
+
+#### 7.如果需要回退内核，利用proxmox-boot-tool回退，终端执行：
+
+```
+proxmox-boot-tool kernel pin 升级前的内核版本号
+
+```
+升级前我的内核版本号是：5.15.64-1-pve，所以命令如下：
+
+```
+proxmox-boot-tool kernel pin 5.15.64-1-pve
+
+```
+
+```
+proxmox-boot-tool refresh
+```
+
+#### 8.执行完第7步的两条命令后，系统重启，内核就回退了。
+
+![jpg](./pic/53.jpg)
 
 
 </details>
