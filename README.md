@@ -1088,6 +1088,14 @@ proxmox-boot-tool refresh
 ![jpg](./pic/53.jpg)
 
 
+然后看到内核切回了，然后终端运行：
+
+```
+/etc/default/grub.d/proxmox-kernel-pin.cfg
+```
+
+以后就能正常使用“升级”来更新PVE。
+
 </details>
 
 
