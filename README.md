@@ -1,4 +1,62 @@
-## Proxmox VE 7.x 相关教程
+## PVE 直通+CPU/硬盘/温度显示+换源/去订阅+CPU睿频模式 一键脚本
+
+![png](./pic/55.png)
+
+- 原始脚本来自 [shidahuilang/pve](https://github.com/shidahuilang/pve/blob/main/pve.sh)
+
+- 轻微修改，简化优化、支持 PVE9！
+
+- **修改 PVE 存在风险，请自行备份重要数据；出现任何风险，自行承担！**
+
+- 防止系统没安装curl，使用不了一键脚本，先执行安装curl命令：
+```sh
+apt -y update && apt -y install curl wget sudo || yum install -y curl wget sudo || apk add curl bash
+```
+
+- **一键脚本：**
+```
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/xiangfeidexiaohuo/pve-diy/master/pve.sh)"
+```
+
+![png](./pic/56.png)
+
+***
+
+- **PVE8 升 PVE9：**
+
+<details>
+<summary>点击展开，查看详细教程！</summary>
+
+- 1、已换源的情况下，运行以下两行命令：（若未换源，运行上面的一键脚本先换源。）
+```
+apt update
+apt dist-upgrade
+```
+- 2、运行升级检查命令：（Error 错误多，就放弃，直接镜像重装。）
+```
+pve8to9
+```
+- 3、修改为 PVE9 的源：
+```
+sed -i 's/bookworm/trixie/g' /etc/apt/sources.list
+sed -i 's/bookworm/trixie/g' /etc/apt/sources.list.d/*.list
+```
+- 4、开始更新 PVE9：（升级过程中，若出现弹窗，不懂就一律默认回车。）
+```
+apt update
+apt dist-upgrade
+```
+- 5、升级完成，重启：（重启完成后，运行上面的一键脚本，修改温度等。）
+```
+reboot
+```
+
+</details>
+
+***
+***
+
+## Proxmox VE 7.x 相关教程（7.x 旧版手动修改，有参考价值，弃用！）
 
 * **包括但不限于换源、直通、界面显示温度/频率等。**
 
