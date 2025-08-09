@@ -85,7 +85,10 @@ aptsources() {
 		TIME r "您的版本不支持！"
 		exit 1
 	fi
-	cp -rf /etc/apt/sources.list /etc/apt/backup/sources.list.bak
+
+	[[ -e /etc/apt/sources.list ]] && cp -rf /etc/apt/sources.list /etc/apt/backup/sources.list.bak
+	[[ -e /etc/apt/sources.list.d/debian.sources ]] && mv /etc/apt/sources.list.d/debian.sources /etc/apt/backup/debian.sources.bak
+
 	echo " 请选择您需要的apt国内源"
 	echo " 1. 清华大学镜像站"
 	echo " 2. 中科大镜像站"
@@ -149,12 +152,12 @@ ctsources() {
 }
 # 更换使用帮助源
 pvehelp(){
-	if [ ! -e /etc/apt/sources.list.d ]; then
-		mkdir -p /etc/apt/sources.list.d;
-	fi;
-	if [[ -f /etc/apt/sources.list.d/pve-no-subscription.list ]];then
-	cp -rf /etc/apt/sources.list.d/pve-no-subscription.list /etc/apt/backup/pve-no-subscription.list.bak
-	fi
+	[[ ! -d /etc/apt/sources.list.d ]] && mkdir -p /etc/apt/sources.list.d
+	[[ -e /etc/apt/sources.list.d/ceph.sources ]] && mv /etc/apt/sources.list.d/ceph.sources /etc/apt/backup/ceph.sources.bak
+	[[ -e /etc/apt/sources.list.d/ceph.list ]] && mv /etc/apt/sources.list.d/ceph.list /etc/apt/backup/ceph.list.bak
+
+    [[ -e /etc/apt/sources.list.d/pve-no-subscription.list ]] && cp -rf /etc/apt/sources.list.d/pve-no-subscription.list /etc/apt/backup/pve-no-subscription.list.bak
+
 	cat > /etc/apt/sources.list.d/pve-no-subscription.list <<-EOF
 deb https://mirrors.tuna.tsinghua.edu.cn/proxmox/debian ${sver} pve-no-subscription
 EOF
@@ -162,12 +165,18 @@ EOF
 }
 # 关闭企业源
 pveenterprise(){
-	if [[ -f /etc/apt/sources.list.d/pve-enterprise.list ]];then
-		cp -rf /etc/apt/sources.list.d/pve-enterprise.list /etc/apt/backup/pve-enterprise.list.bak
-		rm -rf /etc/apt/sources.list.d/pve-enterprise.list
-		TIME g "企业源已移除完成!"
+	if [[ -e /etc/apt/sources.list.d/pve-enterprise.sources ]];then
+		mv /etc/apt/sources.list.d/pve-enterprise.sources /etc/apt/backup/pve-enterprise.sources.bak
+		TIME g "企业源pve-enterprise.sources已移除完成!"
 	else
-		TIME g "pve-enterprise.list不存在，忽略!"
+		TIME g "企业源pve-enterprise.sources不存在，忽略!"
+	fi
+
+	if [[ -e /etc/apt/sources.list.d/pve-enterprise.list ]];then
+		mv /etc/apt/sources.list.d/pve-enterprise.list /etc/apt/backup/pve-enterprise.list.bak
+		TIME g "企业源pve-enterprise.list已移除完成!"
+	else
+		TIME g "企业源pve-enterprise.list不存在，忽略!"
 	fi
 }
 # 移除无效订阅
@@ -180,12 +189,11 @@ novalidsub(){
 	TIME g "已移除订阅提示!"
 }
 pvegpg(){
-	cp -rf /etc/apt/trusted.gpg.d/proxmox-release-${sver}.gpg /etc/apt/backup/proxmox-release-${sver}.gpg.bak
-	rm -rf /etc/apt/trusted.gpg.d/proxmox-release-${sver}.gpg
+	[[ -e /etc/apt/trusted.gpg.d/proxmox-release-${sver}.gpg ]] && mv /etc/apt/trusted.gpg.d/proxmox-release-${sver}.gpg /etc/apt/backup/proxmox-release-${sver}.gpg.bak
 	wget -q --timeout=5 --tries=1 --show-progres http://mirrors.tuna.tsinghua.edu.cn/proxmox/debian/proxmox-release-${sver}.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-${sver}.gpg
 	if [[ $? -ne 0 ]];then
 		TIME r "尝试重新下载..."
-		wget -q --timeout=5 --tries=1 --show-progres https://enterprise.proxmox.com/debian/proxmox-release-${sver}.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-${sver}.gpg
+		wget -q --timeout=5 --tries=1 --show-progres https://raw.githubusercontent.com/xiangfeidexiaohuo/pve-diy/master/gpg/proxmox-release-${sver}.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-${sver}.gpg
 			if [[ $? -ne 0 ]];then
 				TIME r "下载秘钥失败，请检查网络再尝试!"
 				sleep 2
@@ -225,10 +233,12 @@ pve_optimization(){
 	systemctl daemon-reload && systemctl restart pveproxy.service && TIME g "服务重启完成!"
 	sleep 3
 	echo
-	TIME y "※※※※※ 更新源、安装常用软件和升级... ※※※※※"
+	TIME y "※※※※※ 更新源、更新常用软件和升级... ※※※※※"
 	# apt-get update && apt-get install -y net-tools curl git
 	# apt-get dist-upgrade -y
-	TIME y "如需对PVE进行升级，请使用apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y"
+	TIME g "更新源命令：apt-get update -y"
+	TIME g "更新软件包命令：apt-get upgrade -y"
+	TIME g "更新PVE命令：apt-get dist-upgrade -y"
 	echo
 	TIME g "修改完毕！"
 }
@@ -256,12 +266,12 @@ pve_ceph(){
 	fi
 
 	TIME g "ceph-squid目前仅支持PVE8和9！"
-	if [ ! -e /etc/apt/sources.list.d ]; then
-		mkdir -p /etc/apt/sources.list.d;
-	fi;
-	if [[ -f /etc/apt/sources.list.d/ceph.list ]];then
-	cp -rf /etc/apt/sources.list.d/ceph.list /etc/apt/backup/ceph.list.bak
-	fi
+	[[ ! -d /etc/apt/backup ]] && mkdir -p /etc/apt/backup
+	[[ ! -d /etc/apt/sources.list.d ]] && mkdir -p /etc/apt/sources.list.d
+
+	[[ -e /etc/apt/sources.list.d/ceph.sources ]] && mv /etc/apt/sources.list.d/ceph.sources /etc/apt/backup/ceph.sources.bak
+    [[ -e /etc/apt/sources.list.d/ceph.list ]] && mv /etc/apt/sources.list.d/ceph.list /etc/apt/backup/ceph.list.bak
+
 	cat > /etc/apt/sources.list.d/ceph.list <<-EOF
 deb https://mirrors.tuna.tsinghua.edu.cn/proxmox/debian/ceph-squid ${sver} no-subscription
 EOF
@@ -517,6 +527,8 @@ echo pve版本$pvever
 # 输入需要安装的软件包
 packages=(lm-sensors nvme-cli sysstat linux-cpupower)
 
+# 先刷新下源
+apt-get update
 # 查询软件包，判断是否安装
 for package in "${packages[@]}"; do
     if ! dpkg -s "$package" &> /dev/null; then

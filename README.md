@@ -10,7 +10,7 @@
 
 - 防止系统没安装curl，使用不了一键脚本，先执行安装curl命令：
 ```sh
-apt -y update && apt -y install curl wget sudo || yum install -y curl wget sudo || apk add curl bash
+apt-get update -y && apt-get install curl wget sudo bash -y
 ```
 
 - **一键脚本：**
