@@ -247,7 +247,7 @@ pve_optimization(){
 
 
 #---------PVE8/9添加ceph-squid源-----------
-pve_ceph(){
+pve9_ceph(){
 	sver=`cat /etc/debian_version |awk -F"." '{print $1}'`
 	case "$sver" in
  	13 )
@@ -278,6 +278,40 @@ EOF
 	TIME g "添加ceph-squid源完成!"
 }
 #---------PVE8/9添加ceph-squid源-----------
+
+
+#---------PVE7/8添加ceph-quincy源-----------
+pve8_ceph(){
+	sver=`cat /etc/debian_version |awk -F"." '{print $1}'`
+	case "$sver" in
+ 	12 )
+  		sver="bookworm"
+ 	;;
+ 	11 )
+  		sver="bullseye"
+ 	;;
+	* )
+		sver=""
+	;;
+	esac
+	if [ ! $sver ];then
+		TIME r "版本不支持！"
+		exit 1
+	fi
+
+	TIME g "ceph-quincy目前仅支持PVE7和8！"
+	[[ ! -d /etc/apt/backup ]] && mkdir -p /etc/apt/backup
+	[[ ! -d /etc/apt/sources.list.d ]] && mkdir -p /etc/apt/sources.list.d
+
+	[[ -e /etc/apt/sources.list.d/ceph.sources ]] && mv /etc/apt/sources.list.d/ceph.sources /etc/apt/backup/ceph.sources.bak
+    [[ -e /etc/apt/sources.list.d/ceph.list ]] && mv /etc/apt/sources.list.d/ceph.list /etc/apt/backup/ceph.list.bak
+
+	cat > /etc/apt/sources.list.d/ceph.list <<-EOF
+deb https://mirrors.tuna.tsinghua.edu.cn/proxmox/debian/ceph-quincy ${sver} main
+EOF
+	TIME g "添加ceph-quincy源完成!"
+}
+#---------PVE7/8添加ceph-squid源-----------
 
 
 #--------------开启硬件直通----------------
@@ -1076,6 +1110,7 @@ menu(){
     4. 添加CPU、主板、硬盘温度显示
     5. 删除CPU、主板、硬盘温度显示
     6. PVE8/9添加ceph-squid源
+    7. PVE7/8添加ceph-quincy源
 ├──────────────────────────────────────────┤
     0. 退出
 └──────────────────────────────────────────┘
@@ -1116,7 +1151,13 @@ EOF
 		menu
 	;;
 	6)
-		pve_ceph
+		pve9_ceph
+		echo
+		pause
+		menu
+	;;
+	7)
+		pve8_ceph
 		echo
 		pause
 		menu
