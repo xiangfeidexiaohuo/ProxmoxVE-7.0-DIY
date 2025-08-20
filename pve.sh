@@ -311,7 +311,31 @@ deb https://mirrors.tuna.tsinghua.edu.cn/proxmox/debian/ceph-quincy ${sver} main
 EOF
 	TIME g "添加ceph-quincy源完成!"
 }
-#---------PVE7/8添加ceph-squid源-----------
+#---------PVE7/8添加ceph-quincy源-----------
+
+
+#---------PVE一键卸载ceph-----------
+remove_ceph(){
+TIME g "会卸载ceph，并删除所有ceph相关文件！"
+
+systemctl stop ceph-mon.target && systemctl stop ceph-mgr.target && systemctl stop ceph-mds.target && systemctl stop ceph-osd.target
+rm -rf /etc/systemd/system/ceph*
+
+killall -9 ceph-mon ceph-mgr ceph-mds ceph-osd
+rm -rf /var/lib/ceph/mon/* && rm -rf /var/lib/ceph/mgr/* && rm -rf /var/lib/ceph/mds/* && rm -rf /var/lib/ceph/osd/*
+
+pveceph purge
+
+apt purge -y ceph-mon ceph-osd ceph-mgr ceph-mds
+apt purge -y ceph-base ceph-mgr-modules-core
+
+rm -rf /etc/ceph && rm -rf /etc/pve/ceph.conf  && rm -rf /etc/pve/priv/ceph.* && rm -rf /var/log/ceph && rm -rf /etc/pve/ceph && rm -rf /var/lib/ceph
+
+[[ -e /etc/apt/sources.list.d/ceph.sources ]] && mv /etc/apt/sources.list.d/ceph.sources /etc/apt/backup/ceph.sources.bak
+
+TIME g "已成功卸载ceph."
+}
+#---------PVE一键卸载ceph-----------
 
 
 #--------------开启硬件直通----------------
@@ -1132,6 +1156,7 @@ menu(){
     5. 删除CPU、主板、硬盘温度显示
     6. PVE8/9添加ceph-squid源
     7. PVE7/8添加ceph-quincy源
+    8. 一键卸载ceph
 ├──────────────────────────────────────────┤
     0. 退出
 └──────────────────────────────────────────┘
@@ -1179,6 +1204,12 @@ EOF
 	;;
 	7)
 		pve8_ceph
+		echo
+		pause
+		menu
+	;;
+	8)
+		remove_ceph
 		echo
 		pause
 		menu
