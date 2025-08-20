@@ -755,7 +755,7 @@ cat > $tmpf << 'EOF'
 	    itemId: 'nvme0-status',
 	    colspan: 2,
 	    printBar: false,
-	    title: gettext('NVME 硬盘'),
+	    title: gettext('NVME硬盘'),
 	    textField: 'nvme0_status',
 	    renderer:function(value){
 	        if (value.length > 0) {
