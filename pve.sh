@@ -990,43 +990,64 @@ cat > $tmpf << 'EOF'
 	},
 	// 检测不到相关参数的可以注释掉---需要的注释本行即可  */
 
-          // SATA硬盘温度
-          {
-          itemId: 'hdd-temperatures',
-          colspan: 2,
-          printBar: false,
-          title: gettext('SATA硬盘'),
-          textField: 'hdd_temperatures',
-          renderer:function(value){
-          if (value.length > 0) {
-          let devices = value.matchAll(/(\s*Model.*:\s*[\s\S]*?\n){1,2}^User.*\[([\s\S]*?)\]\n^\s*9[\s\S]*?\-\s*([\d]+)[\s\S]*?(\n(^19[0,4][\s\S]*?$){1,2}|\s{0}$)/gm);
-          for (const device of devices) {
-          if(device[1].indexOf("Family") !== -1){
+  // SATA硬盘温度
+  {
+  itemId: 'hdd-temperatures',
+  colspan: 2,
+  printBar: false,
+  title: gettext('SATA硬盘'),
+  textField: 'hdd_temperatures',
+  renderer: function(value) {
+    if (value.length > 0) {
+      let devices = value.matchAll(/(\s*(Model|Device Model|Vendor).*:\s*[\s\S]*?\n){1,2}^User.*\[([\s\S]*?)\]\n^\s*9[\s\S]*?\-\s*([\d]+)[\s\S]*?(\n(^19[0,4][\s\S]*?$){1,2}|\s{0}$)/gm);
+      let output = '';
+      
+      for (const device of devices) {
+        let devicemodel = '';
+        
+        if (device[1].indexOf("Family") !== -1) {
           devicemodel = device[1].replace(/.*Model Family:\s*([\s\S]*?)\n^Device Model:\s*([\s\S]*?)\n/m, '$1 - $2');
+        } else if (device[1].match(/Vendor/)) {
+          devicemodel = device[1].replace(/.*Vendor:\s*([\s\S]*?)\n^.*Model:\s*([\s\S]*?)\n/m, '$1 $2');
+        } else {
+          devicemodel = device[1].replace(/.*(Model|Device Model):\s*([\s\S]*?)\n/m, '$2');
+        }
+        
+        let capacity = device[3] ? device[3].replace(/ |,/gm, '') : "未知容量";
+        let powerOnHours = device[4] || "未知";
+        
+        if (value.indexOf("Min/Max") !== -1) {
+          let devicetemps = device[6]?.matchAll(/19[0,4][\s\S]*?\-\s*(\d+)(\s\(Min\/Max\s(\d+)\/(\d+)\)$|\s{0}$)/gm);
+          for (const devicetemp of devicetemps || []) {
+            output += `${devicemodel} | 容量: ${capacity} | 已通电: ${powerOnHours}小时 | 温度: ${devicetemp[1]}°C\n`;
+          }
+        } else if (value.indexOf("Temperature") !== -1 || value.match(/Airflow_Temperature/)) {
+          let devicetemps = device[6]?.matchAll(/19[0,4][\s\S]*?\-\s*(\d+)/gm);
+          for (const devicetemp of devicetemps || []) {
+            output += `${devicemodel} | 容量: ${capacity} | 已通电: ${powerOnHours}小时 | 温度: ${devicetemp[1]}°C\n`;
+          }
+        } else {
+          if (value.match(/\/dev\/sd[a-z]/) && !output) {
+            output += `${devicemodel} | 容量: ${capacity} | 已通电: ${powerOnHours}小时 | 提示: 设备存在但未报告温度信息\n`;
           } else {
-          devicemodel = device[1].replace(/.*Model:\s*([\s\S]*?)\n/m, '$1');
+            output += `${devicemodel} | 容量: ${capacity} | 已通电: ${powerOnHours}小时 | 提示: 未检测到温度传感器\n`;
           }
-          device[2] = device[2].replace(/ |,/gm, '');
-          if(value.indexOf("Min/Max") !== -1){
-          let devicetemps = device[5].matchAll(/19[0,4][\s\S]*?\-\s*(\d+)(\s\(Min\/Max\s(\d+)\/(\d+)\)$|\s{0}$)/gm);
-          for (const devicetemp of devicetemps) {
-          value = `${devicemodel} | 容量: ${device[2]} | 已通电: ${device[3]}小时 | 温度: ${devicetemp[1]}°C\n`;
-          }
-          } else if (value.indexOf("Temperature") !== -1){
-          let devicetemps = device[5].matchAll(/19[0,4][\s\S]*?\-\s*(\d+)/gm);
-          for (const devicetemp of devicetemps) {
-          value = `${devicemodel} | 容量: ${device[2]} | 已通电: ${device[3]}小时 | 温度: ${devicetemp[1]}°C\n`;
-          }
-          } else {
-          value = `${devicemodel} | 容量: ${device[2]} | 已通电: ${device[3]}小时 | 提示: 未检测到温度传感器\n`;
-          }
-          }
-          return value.replace(/\n/g, '<br>');
-          } else { 
-          return `提示: 未安装硬盘或已直通硬盘控制器`;
-          }
-          }
-          },
+        }
+      }
+      
+      if (!output && value.length > 0) {
+        let fallbackDevices = value.matchAll(/(\/dev\/sd[a-z]).*?Model:([\s\S]*?)\n/gm);
+        for (const fallbackDevice of fallbackDevices || []) {
+          output += `${fallbackDevice[2].trim()} | 提示: 设备存在但无法获取完整信息\n`;
+        }
+      }
+      
+      return output ? output.replace(/\n/g, '<br>') : '提示: 检测到硬盘但无法识别详细信息';
+    } else {
+      return '提示: 未安装硬盘或已直通硬盘控制器';
+    }
+  }
+  },
 EOF
 
 echo 找到关键字pveversion的行号
